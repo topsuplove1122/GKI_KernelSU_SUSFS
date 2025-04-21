@@ -142,7 +142,7 @@ jobs:
           # Clone repositories using the branch names
           git clone https://github.com/WildPlusKernel/AnyKernel3.git -b "gki-2.0"
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-          git clone https://github.com/WildPlusKernel/kernel_patches.git
+          git clone https://github.com/ShirkNeko/SukiSU_patch.git
 
       - name: Set CONFIG Environment Variable
         run: |
@@ -154,48 +154,29 @@ jobs:
 
           echo "CONFIG set to: $CONFIG"
 
-      # - name: Initialize and Sync Kernel Source
-      #   run: |
-      #     echo "Creating folder for configuration: $CONFIG..."
-      #     mkdir -p "$CONFIG"
-      #     cd "$CONFIG"
-
-      #     # Initialize and sync kernel source
-      #     echo "Initializing and syncing kernel source..."
-      #     FORMATTED_BRANCH="${{ inputs.android_version }}-${{ inputs.kernel_version }}-${{ inputs.os_patch_level }}"
-      #     $REPO init --depth=1 --u https://android.googlesource.com/kernel/manifest -b common-${FORMATTED_BRANCH} --repo-rev=v2.16
-
-      #     REMOTE_BRANCH=$(git ls-remote https://android.googlesource.com/kernel/common ${FORMATTED_BRANCH})
-      #     DEFAULT_MANIFEST_PATH=.repo/manifests/default.xml
-
-      #     # Check if branch is deprecated
-      #     if grep -q deprecated <<< $REMOTE_BRANCH; then
-      #       echo "Found deprecated branch: $FORMATTED_BRANCH"
-      #       sed -i "s/\"${FORMATTED_BRANCH}\"/\"deprecated\/${FORMATTED_BRANCH}\"/g" $DEFAULT_MANIFEST_PATH
-      #     fi
-
-      #     # Sync repo and apply patches
-      #     $REPO --version
-      #     $REPO --trace sync -c -j$(nproc --all) --no-tags --fail-fast
-
-      - name: Initialize and Sync OnePlus Kernel Source
+      - name: Initialize and Sync Kernel Source
         run: |
           echo "Creating folder for configuration: $CONFIG..."
           mkdir -p "$CONFIG"
           cd "$CONFIG"
 
-          # 克隆 OnePlus 內核倉庫
-          echo "Cloning OnePlus Kernel Source..."
-          git clone --depth=1 -b oneplus/sm8750_v_15.0.0_oneplus_ace5_pro https://github.com/OnePlusOSS/android_kernel_common_oneplus_sm8750.git .
+          # Initialize and sync kernel source
+          echo "Initializing and syncing kernel source..."
+          FORMATTED_BRANCH="${{ inputs.android_version }}-${{ inputs.kernel_version }}-${{ inputs.os_patch_level }}"
+          $REPO init --depth=1 --u https://android.googlesource.com/kernel/manifest -b common-${FORMATTED_BRANCH} --repo-rev=v2.16
 
-          # 檢查是否克隆成功
-          if [ ! -d ".git" ]; then
-            echo "Error: Failed to clone OnePlus kernel source!"
-            exit 1
+          REMOTE_BRANCH=$(git ls-remote https://android.googlesource.com/kernel/common ${FORMATTED_BRANCH})
+          DEFAULT_MANIFEST_PATH=.repo/manifests/default.xml
+
+          # Check if branch is deprecated
+          if grep -q deprecated <<< $REMOTE_BRANCH; then
+            echo "Found deprecated branch: $FORMATTED_BRANCH"
+            sed -i "s/\"${FORMATTED_BRANCH}\"/\"deprecated\/${FORMATTED_BRANCH}\"/g" $DEFAULT_MANIFEST_PATH
           fi
 
-          echo "Successfully cloned OnePlus kernel source."
-
+          # Sync repo and apply patches
+          $REPO --version
+          $REPO --trace sync -c -j$(nproc --all) --no-tags --fail-fast
 
       - name: Copy file
         if: ${{ inputs.make_release == false }}

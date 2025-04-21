@@ -31,8 +31,8 @@ jobs:
   build-kernel-a12-5-10-kernelsu-susfs:
     strategy:
       fail-fast: false
-      matrix:
-        include:
+      # matrix:
+      #   include:
         # - sub_level: "66"
         #   os_patch_level: "2022-01"
         #   revision: "r11"

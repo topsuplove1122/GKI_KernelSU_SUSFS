@@ -18,9 +18,9 @@ on:
         type: choice
         options:
           - Official
-          - Next
+          - Sukisu
           - MKSU
-        default: Next
+        default: Sukisu
       kernelsu_branch:
         description: "Choose ksu branch"
         required: true
@@ -136,8 +136,8 @@ jobs:
           # Determine the branch based on user input
           if [[ "${{ inputs.kernelsu_variant }}" == "Official" || "${{ inputs.kernelsu_variant }}" == "MKSU" ]]; then
             BRANCH="main"
-          elif [[ "${{ inputs.kernelsu_variant }}" == "Next" ]]; then
-            BRANCH="next"
+          elif [[ "${{ inputs.kernelsu_variant }}" == "Sukisu" ]]; then
+            BRANCH="sukisu"
           elif [[ "${{ inputs.kernelsu_branch }}" == "Other" && -n "${{ inputs.kernelsu_branch_other }}" ]]; then
             BRANCH="${{ inputs.kernelsu_branch_other }}"
           else

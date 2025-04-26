@@ -244,10 +244,10 @@ jobs:
           cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
           cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
 
-          echo "正在给内核打lz4补丁"
-          cp -r ../SukiSU_patch/other/lz4k/include/linux/* ./common/include/linux
-          cp -r ../SukiSU_patch/other/lz4k/lib/* ./common/lib
-          cp -r ../SukiSU_patch/other/lz4k/crypto/* ./common/crypto
+          ＃ echo "正在给内核打lz4补丁"
+          ＃ cp -r ../SukiSU_patch/other/lz4k/include/linux/* ./common/include/linux
+          ＃ cp -r ../SukiSU_patch/other/lz4k/lib/* ./common/lib
+          ＃ cp -r ../SukiSU_patch/other/lz4k/crypto/* ./common/crypto
           
 
           # if [ "${{ inputs.kernelsu_variant }}" == "Official" ]; then
@@ -303,10 +303,10 @@ jobs:
           patch -p1 -F 3 < ksu_hooks.patch
           echo "ksu_patch完成"
 
-          cp ../../SukiSU_patch/other/lz4k_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
-          echo "正在打lz4kd补丁"
-          patch -p1 -F 3 < lz4kd.patch || true
-          echo "lz4_patch完成"
+          ＃ cp ../../SukiSU_patch/other/lz4k_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
+          ＃ echo "正在打lz4kd补丁"
+          ＃ patch -p1 -F 3 < lz4kd.patch || true
+          ＃ echo "lz4_patch完成"
 
       # - name: Apply New Hooks Patches
       #   run: |
@@ -353,34 +353,7 @@ jobs:
           echo "CONFIG_KPM=y" >> ./arch/arm64/configs/gki_defconfig
           sed -i '2s/check_defconfig//' ./build.config.gki
 
-          CONFIG_FILE=./arch/arm64/configs/gki_defconfig
-          if [ "${{ inputs.kernel_version }}" = "5.10" ]; then
-              echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
-              echo "CONFIG_ZRAM=y" >> "$CONFIG_FILE"
-              echo "CONFIG_MODULE_SIG=n" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZO=y" >> "$CONFIG_FILE"
-              echo "CONFIG_ZRAM_DEF_COMP_LZ4KD=y" >> "$CONFIG_FILE"
-            fi
-
-            if [ "${{ inputs.kernel_version }}" != "6.6" ] && [ "${{ github.event.inputs.KERNEL_VERSION }}" != "5.10" ]; then
-              sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' "$CONFIG_FILE"
-              sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' "$CONFIG_FILE"
-              sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
-            fi
-
-            if [ "${{ inputs.kernel_version }}" = "6.6" ]; then
-              echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
-              sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
-            fi
-
-            if grep -q "CONFIG_ZSMALLOC=y" "$CONFIG_FILE" && grep -q "CONFIG_ZRAM=y" "$CONFIG_FILE"; then
-              echo "CONFIG_CRYPTO_LZ4HC=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZ4K=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZ4KD=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_842=y" >> "$CONFIG_FILE"
-              # Remove check_defconfig
-              sed -i 's/check_defconfig//' ./build.config.gki
-            fi
+          
       
       # - name: Config BBR
       #   #if: ${{ inputs.kernel_version != '6.6' }}

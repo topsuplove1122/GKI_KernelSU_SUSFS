@@ -303,10 +303,10 @@ jobs:
           patch -p1 -F 3 < ksu_hooks.patch
           echo "ksu_patch完成"
 
-          ＃ cp ../../SukiSU_patch/other/lz4k_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
-          ＃ echo "正在打lz4kd补丁"
-          ＃ patch -p1 -F 3 < lz4kd.patch || true
-          ＃ echo "lz4_patch完成"
+          # cp ../../SukiSU_patch/other/lz4k_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
+          # echo "正在打lz4kd补丁"
+          # patch -p1 -F 3 < lz4kd.patch || true
+          # echo "lz4_patch完成"
 
       # - name: Apply New Hooks Patches
       #   run: |

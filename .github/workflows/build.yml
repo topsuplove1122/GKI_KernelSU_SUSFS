@@ -508,6 +508,12 @@ jobs:
         SYMBOL_LIST=android/abi_gki_aarch64_xiaomi
         echo "device_find_any_child" >> $SYMBOL_LIST
 
+    - name: Fix WiFi and Bluetooth on Xiaomi 6.12 GKI devices
+      if: ${{ ( inputs.kernel_version == '6.12' ) }}
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      run: |
+        sed -i '0,/protected_module_names_list *= *":gki_aarch64_protected_module_names"/s//check_defconfig = "disabled"/' "BUILD.bazel"
+
     - name: Configure Kernel Options
       working-directory: ${{ env.KERNEL_ROOT }}
       run: |

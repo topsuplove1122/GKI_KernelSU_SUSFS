@@ -512,7 +512,8 @@ jobs:
       if: ${{ ( inputs.kernel_version == '6.12' ) }}
       working-directory: ${{ env.KERNEL_ROOT }}/common
       run: |
-        sed -i '0,/protected_module_names_list *= *":gki_aarch64_protected_module_names"/s//check_defconfig = "disabled"/' "BUILD.bazel"
+        sed -i 's/check_defconfig = .*,/check_defconfig = "disabled",/g' BUILD.bazel
+        sed -i '/protected_module_names_list/d' BUILD.bazel
 
     - name: Configure Kernel Options
       working-directory: ${{ env.KERNEL_ROOT }}

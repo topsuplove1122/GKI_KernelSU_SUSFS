@@ -424,7 +424,7 @@ jobs:
             ;;
           KSU)
             SUSFS_VERSION="2.0.0"
-            echo "--- [INFO] Start Patching for KSU Mode ---"
+            echo "--- [INFO] Start Patching for KSU Mode (v2.0) ---"
       
             cd "$KERNEL_ROOT/KernelSU"
             cp "$SUSFS4KSU/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" .
@@ -435,36 +435,42 @@ jobs:
             cp "$SUSFS4KSU/kernel_patches/include/linux/"* "$KERNEL_ROOT/common/include/linux/"
             cp "$SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch" ./
       
-            # 應用補丁 (允許部分失敗)
+            # 應用補丁
             patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
       
-            # --- 強制修復 base.c (關鍵修改) ---
-            echo "--- [INFO] Fixing fs/proc/base.c ---"
+            # --- 強制修復 fs/proc/base.c ---
+            TARGET_FILE="fs/proc/base.c"
+            echo "--- [INFO] Fixing $TARGET_FILE ---"
       
-            if [ -f "fs/proc/base.c" ]; then
-                # 1. 先清理可能存在的垃圾 (可選)
-                rm -f fs/proc/base.c.rej
-          
-                # 2. 檢查是否已經包含 susfs.h
-                if grep -q "linux/susfs.h" fs/proc/base.c; then
-                    echo "[WARN] susfs.h already found in base.c, skipping insert."
+            if [ -f "$TARGET_FILE" ]; then
+                # 清理舊的 .rej
+                rm -f "${TARGET_FILE}.rej"
+                
+                # 檢查是否已經有 susfs.h
+                if grep -q "linux/susfs.h" "$TARGET_FILE"; then
+                    echo "[WARN] susfs.h already present."
                 else
-                    echo "[INFO] susfs.h not found. Inserting manually..."
-              # 直接插入到第 12 行，不依賴尋找特定字串，這樣最穩
-                    sed -i '25i #include <linux/susfs.h>' fs/proc/base.c
+                    echo "[INFO] Locating '#include \"fd.h\"' and inserting susfs.h after it..."
+              
+                    # 【關鍵修改】: 找到包含 "fd.h" 的那一行，在該行"後面(a)"插入新代碼
+                    sed -i '/#include "fd.h"/a #include <linux/susfs.h>' "$TARGET_FILE"
                 fi
           
-                # 3. 再次驗證
-                if grep -q "linux/susfs.h" fs/proc/base.c; then
-                    echo "[SUCCESS] susfs.h successfully added to base.c!"
-              # 打印出前 20 行確認
-                    head -n 20 fs/proc/base.c
+                # 驗證
+                if grep -q "linux/susfs.h" "$TARGET_FILE"; then
+                    echo "[SUCCESS] Header added successfully!"
+                    echo "--- Verification: Context around insertion ---"
+                    # 顯示 susfs.h 的前後 3 行，確認它跟其他頭文件在一起
+                    grep -n -C 3 "linux/susfs.h" "$TARGET_FILE"
+                    echo "--------------------------------------------"
                 else
-                    echo "[ERROR] Failed to add susfs.h! Build will likely fail."
+                    echo "[ERROR] Failed to insert header. Maybe '#include \"fd.h\"' does not exist in this kernel version?"
+                    echo "Dumping grep result for fd.h:"
+                    grep "fd.h" "$TARGET_FILE" || echo "fd.h NOT FOUND"
                     exit 1
                 fi
             else
-                echo "[ERROR] fs/proc/base.c not found!"
+                echo "[ERROR] $TARGET_FILE not found!"
                 exit 1
             fi
             ;;

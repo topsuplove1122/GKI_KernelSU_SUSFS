@@ -737,7 +737,7 @@ jobs:
           esac
         else
           #perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "\${KERNELVERSION}\${file_localversion}\${config_localversion}\${LOCALVERSION}-Wild\${scm_version}"/s' ./common/scripts/setlocalversion
-          perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "6.12.23-android16-5-ga5f232d1ead0-ab14083253-4k"/s' ./common/scripts/setlocalversion
+          perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "6.6.102-android15-8-g3e3c7bca8549-ab14592915-4k"/s' ./common/scripts/setlocalversion
         fi
         if [ -f "build/build.sh" ]; then
           #Remove Dirty Flag

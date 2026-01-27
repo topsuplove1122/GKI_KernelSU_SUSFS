@@ -424,15 +424,49 @@ jobs:
             ;;
           KSU)
             SUSFS_VERSION="2.0.0"
+            echo "--- [INFO] Start Patching for KSU Mode ---"
+      
             cd "$KERNEL_ROOT/KernelSU"
             cp "$SUSFS4KSU/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" .
             patch -p1 < 10_enable_susfs_for_ksu.patch
+      
             cd "$KERNEL_ROOT/common"
             cp "$SUSFS4KSU/kernel_patches/fs/"* "$KERNEL_ROOT/common/fs/"
             cp "$SUSFS4KSU/kernel_patches/include/linux/"* "$KERNEL_ROOT/common/include/linux/"
-            cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch ./
+            cp "$SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch" ./
+      
+            # 應用補丁 (允許部分失敗)
             patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
-            sed -i '/#include <linux\/fs.h>/a #include <linux\/susfs.h>' fs/proc/base.c
+      
+            # --- 強制修復 base.c (關鍵修改) ---
+            echo "--- [INFO] Fixing fs/proc/base.c ---"
+      
+            if [ -f "fs/proc/base.c" ]; then
+                # 1. 先清理可能存在的垃圾 (可選)
+                rm -f fs/proc/base.c.rej
+          
+                # 2. 檢查是否已經包含 susfs.h
+                if grep -q "linux/susfs.h" fs/proc/base.c; then
+                    echo "[WARN] susfs.h already found in base.c, skipping insert."
+                else
+                    echo "[INFO] susfs.h not found. Inserting manually..."
+              # 直接插入到第 12 行，不依賴尋找特定字串，這樣最穩
+                    sed -i '12i #include <linux/susfs.h>' fs/proc/base.c
+                fi
+          
+                # 3. 再次驗證
+                if grep -q "linux/susfs.h" fs/proc/base.c; then
+                    echo "[SUCCESS] susfs.h successfully added to base.c!"
+              # 打印出前 20 行確認
+                    head -n 20 fs/proc/base.c
+                else
+                    echo "[ERROR] Failed to add susfs.h! Build will likely fail."
+                    exit 1
+                fi
+            else
+                echo "[ERROR] fs/proc/base.c not found!"
+                exit 1
+            fi
             ;;
         esac
 

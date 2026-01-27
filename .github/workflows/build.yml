@@ -432,9 +432,7 @@ jobs:
             cp "$SUSFS4KSU/kernel_patches/include/linux/"* "$KERNEL_ROOT/common/include/linux/"
             cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch ./
             patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
-            if [[ "${{ inputs.kernel_version }}" == "6.6" ]]; then
-              sed -i '/#include <linux\/fs.h>/a #include <linux\/susfs.h>' "$KERNEL_ROOT/common/fs/proc/base.c"
-            fi
+            sed -i '/#include <linux\/fs.h>/a #include <linux\/susfs.h>' fs/proc/base.c
             ;;
         esac
 

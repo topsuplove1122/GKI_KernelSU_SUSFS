@@ -430,8 +430,8 @@ jobs:
             cd "$KERNEL_ROOT/common"
             cp "$SUSFS4KSU/kernel_patches/fs/"* "$KERNEL_ROOT/common/fs/"
             cp "$SUSFS4KSU/kernel_patches/include/linux/"* "$KERNEL_ROOT/common/include/linux/"
-            cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android16-6.12.patch ./
-            patch -p1 < 50_add_susfs_in_gki-android16-6.12.patch || true
+            cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch ./
+            patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
             ;;
         esac
 

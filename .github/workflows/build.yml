@@ -451,7 +451,7 @@ jobs:
                 else
                     echo "[INFO] susfs.h not found. Inserting manually..."
               # 直接插入到第 12 行，不依賴尋找特定字串，這樣最穩
-                    sed -i '12i #include <linux/susfs.h>' fs/proc/base.c
+                    sed -i '25i #include <linux/susfs.h>' fs/proc/base.c
                 fi
           
                 # 3. 再次驗證

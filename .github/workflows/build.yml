@@ -1,4 +1,5 @@
-name: Kernel Build Process
+
+name: Kernel 6.12 Build Process
 permissions:
   contents: write
   actions: write
@@ -424,55 +425,14 @@ jobs:
             ;;
           KSU)
             SUSFS_VERSION="2.0.0"
-            echo "--- [INFO] Start Patching for KSU Mode (v2.0) ---"
-      
             cd "$KERNEL_ROOT/KernelSU"
             cp "$SUSFS4KSU/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" .
             patch -p1 < 10_enable_susfs_for_ksu.patch
-      
             cd "$KERNEL_ROOT/common"
             cp "$SUSFS4KSU/kernel_patches/fs/"* "$KERNEL_ROOT/common/fs/"
             cp "$SUSFS4KSU/kernel_patches/include/linux/"* "$KERNEL_ROOT/common/include/linux/"
-            cp "$SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch" ./
-      
-            # 應用補丁
-            patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
-      
-            # --- 強制修復 fs/proc/base.c ---
-            TARGET_FILE="fs/proc/base.c"
-            echo "--- [INFO] Fixing $TARGET_FILE ---"
-      
-            if [ -f "$TARGET_FILE" ]; then
-                # 清理舊的 .rej
-                rm -f "${TARGET_FILE}.rej"
-                
-                # 檢查是否已經有 susfs.h
-                if grep -q "linux/susfs.h" "$TARGET_FILE"; then
-                    echo "[WARN] susfs.h already present."
-                else
-                    echo "[INFO] Locating '#include \"fd.h\"' and inserting susfs.h after it..."
-              
-                    # 【關鍵修改】: 找到包含 "fd.h" 的那一行，在該行"後面(a)"插入新代碼
-                    sed -i '/#include "fd.h"/a #include <linux/susfs.h>' "$TARGET_FILE"
-                fi
-          
-                # 驗證
-                if grep -q "linux/susfs.h" "$TARGET_FILE"; then
-                    echo "[SUCCESS] Header added successfully!"
-                    echo "--- Verification: Context around insertion ---"
-                    # 顯示 susfs.h 的前後 3 行，確認它跟其他頭文件在一起
-                    grep -n -C 3 "linux/susfs.h" "$TARGET_FILE"
-                    echo "--------------------------------------------"
-                else
-                    echo "[ERROR] Failed to insert header. Maybe '#include \"fd.h\"' does not exist in this kernel version?"
-                    echo "Dumping grep result for fd.h:"
-                    grep "fd.h" "$TARGET_FILE" || echo "fd.h NOT FOUND"
-                    exit 1
-                fi
-            else
-                echo "[ERROR] $TARGET_FILE not found!"
-                exit 1
-            fi
+            cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-android16-6.12.patch ./
+            patch -p1 < 50_add_susfs_in_gki-android16-6.12.patch || true
             ;;
         esac
 
@@ -778,7 +738,7 @@ jobs:
           esac
         else
           #perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "\${KERNELVERSION}\${file_localversion}\${config_localversion}\${LOCALVERSION}-Wild\${scm_version}"/s' ./common/scripts/setlocalversion
-          perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "6.6.102-android15-8-g3e3c7bca8549-ab14592915-4k"/s' ./common/scripts/setlocalversion
+          perl -i -0777 -pe 's/(.*)echo "\$\{KERNELVERSION\}\$\{file_localversion\}\$\{config_localversion\}\$\{LOCALVERSION\}\$\{scm_version\}"/$1echo "6.12.23-android16-5-ga5f232d1ead0-ab14083253-4k"/s' ./common/scripts/setlocalversion
         fi
         if [ -f "build/build.sh" ]; then
           #Remove Dirty Flag
